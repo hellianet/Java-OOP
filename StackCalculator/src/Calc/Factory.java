@@ -1,3 +1,5 @@
+package Calc;
+
 import MyException.WrongCommandNameException;
 import commands.ICommand;
 
@@ -10,9 +12,8 @@ public class Factory {
     private Properties p;
 
     private Factory() throws IOException {
-        Properties prop = new Properties();
-        prop.load(Factory.class.getResourceAsStream("resources/commands"));
-        p = prop;
+        p = new Properties();
+        p.load(Factory.class.getResourceAsStream("resources/commands.properties"));
     }
 
     public ICommand getCommand(String cmdName) throws WrongCommandNameException, IllegalAccessException, InstantiationException {
@@ -23,7 +24,7 @@ public class Factory {
         try {
             com = Class.forName(p.getProperty(cmdName));
         } catch (ClassNotFoundException e) {
-            throw new WrongCommandNameException("Wrong name: " + cmdName);
+            throw new WrongCommandNameException("Wrong name command: " + cmdName);
         }
         return (ICommand) com.newInstance();
 
@@ -42,6 +43,4 @@ public class Factory {
         }
         return localInstance;
     }
-
-
 }
