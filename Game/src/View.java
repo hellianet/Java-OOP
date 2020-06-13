@@ -3,7 +3,6 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -20,8 +19,9 @@ import java.util.Set;
 
 public class View implements Observer {
 
-    private int countFruit;
+
     private ArrayList<Cell> fruit;
+    private Player player;
     private Game game;
     private Stage stage;
     private Map<Player,Snake> userList;
@@ -30,13 +30,10 @@ public class View implements Observer {
     private HashMap<Player, Color> colorSnake;
     private HashMap<Player, Cell> snakeTail;
     private GridPane labelsGrid;
-    private double rectWidth = 0;
-    private double rectHeight = 0;
-    private  ImageView input;
-    private  ImageView winnerExit;
-    private  ImageView loserExit;
-    private  TextField enterName;
-    public View(Game game, Stage st){
+    private  ImageView exitButton;
+
+    public View(Game game, Player player, Stage st){
+        this.player = player;
         this.game = game;
         this.stage = st;
         this.game.registerObserver(this);
@@ -44,36 +41,24 @@ public class View implements Observer {
         fruit = new ArrayList<>();
         labels = new HashMap<>();
         rects = new Rectangle[game.sizeField()][game.sizeField()];
+        exitButton = new ImageView(new Image("exitButton.png",180, 45, false, false));
     }
 
-    public TextField getEnterName() {
-        return enterName;
+    private void check(){
+        if(game.getIsLose().contains(player)){
+            lose();
+        }
+
+        if(game.getIsWin().contains(player)){
+            win();
+        }
+
     }
 
-    public ImageView getInputImage(){
-        return input;
+    public ImageView getExitButton(){
+        return exitButton;
     }
 
-    public ImageView getWinnerExitImage(){
-        return winnerExit;
-    }
-
-    public ImageView getLoserExitImage(){
-        return loserExit;
-    }
-
-    public void menu(){
-        Label label = new Label("Enter your name");
-        label.setFont(new Font("Algerian",18));
-        input = new ImageView(new Image("https://www.pngarts.com/files/3/Play-Now-Button-Transparent-Background-PNG.png",180, 45, false, false));
-        enterName = new TextField();
-        enterName.setPrefColumnCount(1);
-        FlowPane root = new FlowPane(Orientation.VERTICAL, 0, 6, label, enterName, input);
-        root.setAlignment(Pos.BOTTOM_CENTER);
-        root.setBackground(new Background(new BackgroundImage(new Image("https://cdn02.nintendo-europe.com/media/images/10_share_images/games_15/nintendo_switch_download_software_1/H2x1_NSwitchDS_SnakePass_image1600w.jpg", 800,400, false,false),null,null,null,null)));
-        Scene scene = new Scene(root, 150, 150);
-        stage.setScene(scene);
-    }
 
     public void game(){
         int width = 600;
@@ -83,21 +68,21 @@ public class View implements Observer {
         GridPane gridpane = new GridPane();
         GridPane gp = new GridPane();
         labelsGrid = new GridPane();
-        rectWidth = (double) width / game.sizeField();
-        rectHeight = (double) width / game.sizeField();
+        double rectWidth = (double) width / game.sizeField();
+        double rectHeight = (double) width / game.sizeField();
         for(int i = 0; i < game.sizeField(); ++i) {
             for (int k = 0; k < game.sizeField(); ++k) {
-                Rectangle rectangle = new Rectangle(rectWidth,rectHeight, Color.YELLOW);
+                Rectangle rectangle = new Rectangle(rectWidth, rectHeight, Color.WHITE);
                 gridpane.add(rectangle, i, k);
                 rects[i][k] = rectangle;
             }
         }
         gp.add(labelsGrid, 0, 0);
         gp.add(gridpane, 0, 1);
-
+        gridpane.setGridLinesVisible(true);
         Scene scene = new Scene(gp, width, height);
-        stage.sizeToScene();
         stage.setScene(scene);
+        stage.sizeToScene();
    }
 
     public void win(){
@@ -105,13 +90,15 @@ public class View implements Observer {
         end.setFont(new Font("Algerian",50));
         Label youIs = new Label("You won!!!");
         youIs.setFont(new Font("Algerian",45));
-        winnerExit = new ImageView(new Image("https://lh3.googleusercontent.com/proxy/QOdOUE6FeIeTj7kGwzqj0KOedbmCStbU8Ze_q1TflGipzDLrLSW7Fkc7SucDzcZwg10mXI9eH5QRmFNp0viciv-LcC1J0T9Dw-Lq71yZNczkTUFTHW0",180, 45, false, false));
-        FlowPane root = new FlowPane(Orientation.VERTICAL, 0, 10, end,youIs, winnerExit);
+        FlowPane root = new FlowPane(Orientation.VERTICAL, 0, 10, end,youIs, exitButton);
         root.setAlignment(Pos.BOTTOM_CENTER);
-        root.setBackground(new Background(new BackgroundImage(new Image("https://ak.picdn.net/shutterstock/videos/23904325/thumb/1.jpg", 800,400, false,false),null,null,null,null)));
+        root.setBackground(new Background(new BackgroundImage(new Image("winBackground.jpg", 800,400, false,false),null,null,null,null)));
         Scene scene = new Scene(root, 800, 400);
-        stage.sizeToScene();
-        stage.setScene(scene);
+        Platform.runLater(() -> {
+            stage.setScene(scene);
+            stage.sizeToScene();
+        });
+
     }
 
     public void lose(){
@@ -123,13 +110,15 @@ public class View implements Observer {
         Label wishPart2 = new Label("you will succeed!");
         wishPart1.setFont(new Font("Algerian",25));
         wishPart2.setFont(new Font("Algerian",25));
-        loserExit = new ImageView(new Image("https://lh3.googleusercontent.com/proxy/QOdOUE6FeIeTj7kGwzqj0KOedbmCStbU8Ze_q1TflGipzDLrLSW7Fkc7SucDzcZwg10mXI9eH5QRmFNp0viciv-LcC1J0T9Dw-Lq71yZNczkTUFTHW0",180, 45, false, false));
-        FlowPane root = new FlowPane(Orientation.VERTICAL, 0, 8, end,youIs,wishPart1,wishPart2, loserExit);
+        FlowPane root = new FlowPane(Orientation.VERTICAL, 0, 8, end,youIs,wishPart1,wishPart2, exitButton);
         root.setAlignment(Pos.BOTTOM_CENTER);
-        root.setBackground(new Background(new BackgroundImage(new Image("http://d3aeoi5a6g6m4p.cloudfront.net/userblog/201909212136063263/cover/cover-maxresdefault-1-.jpg", 800,400, false,false),null,null,null,null)));
+        root.setBackground(new Background(new BackgroundImage(new Image("loseBackground.jpg", 800,400, false,false),null,null,null,null)));
         Scene scene = new Scene(root, 800, 400);
-        stage.sizeToScene();
-        stage.setScene(scene);
+        Platform.runLater(() -> {
+            stage.setScene(scene);
+            stage.sizeToScene();
+        });
+
     }
 
     public Stage getStage() {
@@ -155,7 +144,7 @@ public class View implements Observer {
     }
 
     public void removeTail(Player pl){
-        rects[snakeTail.get(pl).getX()][snakeTail.get(pl).getY()].setFill(Color.YELLOW);
+        rects[snakeTail.get(pl).getX()][snakeTail.get(pl).getY()].setFill(Color.WHITE);
     }
 
     public void addFieldCoordinate(Cell cl){
@@ -238,6 +227,7 @@ public class View implements Observer {
            }
        }
        addFruitCoordinate();
+       check();
    }
 
 }

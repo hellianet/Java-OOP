@@ -55,7 +55,7 @@ public class Game implements Observable {
                 }
             }
         };
-        timer.schedule(timerTask, 0, 500);
+        timer.schedule(timerTask, 0, 200);
     }
 
     public Map<Player,Snake> getUserList(){
@@ -113,7 +113,7 @@ public class Game implements Observable {
             Cell cl = getCoordinate(Status.FRUIT);
             fruit.add(0, cl);
             field.addCoordinates(cl.getX(), cl.getY(),Status.FRUIT);
-            }
+        }
     }
 
     public boolean snakeIsAlive(Player player){
